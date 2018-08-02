@@ -12,8 +12,7 @@ def prep_data():
 
 def add_list_to_window(window, numlist):
     txt = "\n".join(numlist)
-    #txt = "pete"
-    window.addstr(1,1,txt)
+    window.addstr(0,0,txt)
 
 def win1(y,x,stdscr):
     w1 = stdscr.subwin(18,x/2,0,0)
