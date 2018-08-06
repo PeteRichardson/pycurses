@@ -14,21 +14,13 @@ def add_list_to_window(window, numlist):
     txt = "\n".join(numlist)
     window.addstr(0,0,txt)
 
-def win1(y,x,stdscr):
-    w1 = stdscr.subwin(18,x/2,0,0)
-    w1.box()
-    w1.bkgd(' ', curses.color_pair(1))
-    add_list_to_window(w1,numbers1)
-    w1.refresh()
-    return w1
-
-def win2(y,x,stdscr):
-    w2 = stdscr.subwin(18,x/2,0,x/2)
-    w2.box()
-    w2.bkgd(' ', curses.color_pair(2))
-    add_list_to_window(w2,numbers1)
-    w2.refresh()
-    return w2
+def win(h,w,start_y,start_x,stdscr,color,numbers):
+    w =  stdscr.subwin(h,w,start_y,start_x)
+    w.box()
+    w.bkgd(' ', curses.color_pair(color))
+    add_list_to_window(w,numbers)
+    w.refresh()
+    return w
 
 def main(stuff):
     NO_KEY_PRESSED = -1
@@ -47,8 +39,8 @@ def main(stuff):
         curses.init_pair(4, curses.COLOR_BLACK, curses.COLOR_BLUE)
 
     y, x = stdscr.getmaxyx()
-    w1 = win1(y,x,stdscr)
-    w2 = win2(y,x,stdscr)
+    w1 = win(y,x/2,0,0,stdscr,1,numbers1)
+    w2 = win(y,x/2,0,x/2,stdscr,2,numbers2)
 
     key_pressed = NO_KEY_PRESSED
     while key_pressed != ord('q'):
