@@ -12,7 +12,7 @@ def prep_data():
 
 def add_list_to_window(window, numlist):
     txt = "\n".join(numlist)
-    window.addstr(0,0,txt)
+    window.addstr(1,1,txt)
 
 def win(h,w,start_y,start_x,stdscr,color,numbers):
     w =  stdscr.subwin(h,w,start_y,start_x)
