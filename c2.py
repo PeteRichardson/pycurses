@@ -2,26 +2,47 @@
 import curses
 
 class Window:
-    def __init__(self, height, width, top, left, stdscr):
-        self.win = stdscr.subwin(height, width, top, left)
+    def __init__(self, bottom, right, top, left, stdscr):
+        self.win = stdscr.subwin(bottom, right, top, left)
         self.win.box()
-        self.content =  stdscr.subwin(height-2, width-2, top+1, left+1)
+        self.content =  stdscr.subwin(bottom-2, right-2, top+1, left+1)
+        self.win.refresh()
 
-def main(stdscr):
+class CursesApp:
+    def __init__(self):
+        self.windows =  {}
+        self.quit = False
 
-    NO_KEY_PRESSED = -1
+    def layout(self):
+        y, x = self.stdscr.getmaxyx()
+        self.windows["lwin"] = Window(y,x/2,0,0,self.stdscr).content
+        self.windows["rwin"] = Window(y,x/2,0,x/2,self.stdscr).content
 
-    y, x = stdscr.getmaxyx()
+    def render(self):
+        self.windows["lwin"].addstr(0,0,"Pete Richardson")
+        self.windows["rwin"].addstr(0,0,"Pete Richardson")
+        #rwin.refresh()
 
-    lwin = Window(y,x/2,0,0,stdscr).content
-    lwin.addstr(0,0,"Pete Richardson")
-    rwin = Window(y,x/2,0,x/2,stdscr).content
-    rwin.addstr(0,0,"Pete Richardson")
-    lwin.addstr(1,0,"Wendy Wilson")
-    
-    key_pressed = NO_KEY_PRESSED
-    while key_pressed != ord('q'):
-        key_pressed = stdscr.getch()
+    def handle_key(self, key):
+        if key == ord('q'):
+            self.quit = True
 
+    def loop(self):
+        NO_KEY_PRESSED = -1
+        key_pressed = NO_KEY_PRESSED
+        while self.quit != True:
+            self.render()
+            key_pressed = self.stdscr.getch()
+            self.handle_key(key_pressed)
 
-curses.wrapper(main)
+    def cleanup(self):
+        pass
+
+    def run(self, stdscr):
+        self.stdscr = stdscr    
+        self.layout() 
+        self.loop()
+        self.cleanup()
+
+app = CursesApp()
+curses.wrapper(app.run)
