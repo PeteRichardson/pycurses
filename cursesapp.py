@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import curses
-from curses import wrapper
+import signal
 
 class Window:
     def __init__(self, bottom, right, top, left, stdscr):
@@ -9,22 +9,20 @@ class Window:
         self.content =  stdscr.subwin(bottom-2, right-2, top+1, left+1)
         self.win.refresh()
 
+def signal_handler(signal, frame):
+	curses.echo()
+	curses.endwin()
+
+signal.signal(signal.SIGINT, signal_handler)
+
+
 class CursesApp:
     def __init__(self):
+
         self.stdscr = curses.initscr()
         self.stdscr.nodelay(True)
-
-        # Enable the keypad ncurses return (instead of 16 bit value)
         self.stdscr.keypad(True)
-
-        # Refresh after attributes
-        self.stdscr.refresh()
-
-        # No echo to screen
         curses.noecho()
-
-        # Remove cursor
-        curses.curs_set(0)
 
         # Colors
         if curses.has_colors():
@@ -59,10 +57,16 @@ class CursesApp:
             self.handle_key(key_pressed)
 
     def cleanup(self):
+        curses.nocbreak()
+	self.stdscr.keypad(False)
+	curses.echo()
         curses.endwin()
 
     def run(self):
-        self.layout() 
-        self.loop()
-        self.cleanup()
-        
+	try:
+	    self.layout() 
+	    self.loop()
+	    self.cleanup()
+        except Exception as e:
+	    self.cleanup()
+	    raise
