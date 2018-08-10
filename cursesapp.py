@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import curses
 import signal
+import time
 
-class Window:
+class Window(object):
     def __init__(self, bottom, right, top, left, stdscr):
         self.win = stdscr.subwin(bottom, right, top, left)
         self.win.box()
@@ -16,11 +17,12 @@ def signal_handler(signal, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 
-class CursesApp:
+class CursesApp(object):
     def __init__(self):
 
         self.stdscr = curses.initscr()
         self.stdscr.nodelay(True)
+        curses.curs_set(0)
         self.stdscr.keypad(True)
         curses.noecho()
 
@@ -36,13 +38,12 @@ class CursesApp:
         self.quit = False
 
     def layout(self):
-        y, x = self.stdscr.getmaxyx()
-        self.windows["lwin"] = Window(y,x/2,0,0,self.stdscr).content
-        self.windows["rwin"] = Window(y,x/2,0,x/2,self.stdscr).content
+        pass
 
     def render(self):
-        self.windows["lwin"].addstr(0,0,"Pete Richardson")
-        self.windows["rwin"].addstr(0,0,"Pete Richardson")
+        for win in self.windows:
+            win.content.addstr(0,0,win.__str__())
+            win.content.refresh()
 
     def handle_key(self, key):
         if key == ord('q'):
@@ -52,9 +53,12 @@ class CursesApp:
         NO_KEY_PRESSED = -1
         key_pressed = NO_KEY_PRESSED
         while self.quit != True:
-            self.render()
             key_pressed = self.stdscr.getch()
-            self.handle_key(key_pressed)
+            if key_pressed != NO_KEY_PRESSED:
+                self.handle_key(key_pressed)
+                self.render()
+                self.stdscr.refresh()
+            time.sleep(0.1)
 
     def cleanup(self):
         curses.nocbreak()
