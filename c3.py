@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-from cursesapp import CursesApp, Window
+import curses
+from cursesapp import CursesApp, Window, BoxWindow
 
-class CountWindow(Window):
+class CountWindow(BoxWindow):
     def __init__(self, bottom, right, top, left, stdscr, start_val=0):
         self.start_val = start_val
         self.reset_data()
@@ -19,7 +20,7 @@ class CountWindow(Window):
     def decrement(self):
         self.rint = self.rint - 1
 
-class StringWindow(Window):
+class StringWindow(BoxWindow):
     def __init__(self, bottom, right, top, left, stdscr, start_string):
         self.lstr = start_string
         super(StringWindow, self).__init__(bottom, right, top, left, stdscr)
@@ -32,7 +33,11 @@ class MyCursesApp(CursesApp):
     def layout(self):
         y, x = self.stdscr.getmaxyx()
         self.lwin = StringWindow(y,x/3,0,0,self.stdscr, "Wokka Wokka")
+        self.lwin.colors = curses.color_pair(1)
+        self.lwin.win.bkgd(' ', self.lwin.colors)
         self.rwin = CountWindow(y,2*x/3,0,x/3,self.stdscr,4)
+        self.rwin.colors = curses.color_pair(2)
+        self.rwin.win.bkgd(' ', self.rwin.colors)
         self.windows = [self.lwin, self.rwin]
         self.render()
 
@@ -45,10 +50,6 @@ class MyCursesApp(CursesApp):
             self.rwin.increment()
         elif key == ord('-'):
             self.rwin.decrement()
-
-    def render2(self):
-        for win in [self.lwin, self.rwin]: 
-            win.content.addstr(0,0,win.__str__())
 
 app = MyCursesApp()
 app.run()

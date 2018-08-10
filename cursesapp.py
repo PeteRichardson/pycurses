@@ -6,20 +6,27 @@ import time
 class Window(object):
     def __init__(self, bottom, right, top, left, stdscr):
         self.win = stdscr.subwin(bottom, right, top, left)
+        self.content = self.win
+        self.win.refresh()
+
+class BoxWindow(Window):
+    def __init__(self, bottom, right, top, left, stdscr):
+        super(BoxWindow, self).__init__(bottom, right, top, left, stdscr)
         self.win.box()
         self.content =  stdscr.subwin(bottom-2, right-2, top+1, left+1)
         self.win.refresh()
 
 def signal_handler(signal, frame):
+        curses.nocbreak()
 	curses.echo()
 	curses.endwin()
+        exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
 
 
 class CursesApp(object):
     def __init__(self):
-
         self.stdscr = curses.initscr()
         self.stdscr.nodelay(True)
         curses.curs_set(0)
@@ -30,11 +37,9 @@ class CursesApp(object):
         if curses.has_colors():
             curses.start_color()
             curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLUE)
-            curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_RED)
-            curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_YELLOW)
-            curses.init_pair(4, curses.COLOR_BLACK, curses.COLOR_BLUE)
+            curses.init_pair(2, curses.COLOR_RED, curses.COLOR_WHITE)
 
-        self.windows =  {}
+        self.windows =  []
         self.quit = False
 
     def layout(self):
@@ -42,7 +47,9 @@ class CursesApp(object):
 
     def render(self):
         for win in self.windows:
-            win.content.addstr(0,0,win.__str__())
+            win.content.addstr(0,0,win.__str__(),win.colors)
+            win.content.clrtobot()
+            win.win.bkgd(' ',win.colors)
             win.content.refresh()
 
     def handle_key(self, key):
